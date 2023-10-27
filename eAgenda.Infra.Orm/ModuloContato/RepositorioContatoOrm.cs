@@ -22,8 +22,8 @@ namespace eAgenda.Infra.Orm.ModuloContato
                 .SingleOrDefault(x => x.Id == id);
         }
 
-        public List<Contato> SelecionarTodos(StatusFavoritoEnum statusFavorito, Guid usuarioId = default)
-        {
+        public List<Contato> SelecionarTodos(StatusFavoritoEnum statusFavorito)
+        { 
             if (statusFavorito == StatusFavoritoEnum.Todos)
                 return registros                                        
                     .ToList();

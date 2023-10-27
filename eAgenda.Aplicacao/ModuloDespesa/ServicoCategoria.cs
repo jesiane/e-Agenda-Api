@@ -117,13 +117,13 @@ namespace eAgenda.Aplicacao.ModuloDespesa
             }
         }
 
-        public Result<List<Categoria>> SelecionarTodos(Guid id = new Guid())
+        public Result<List<Categoria>> SelecionarTodos()
         {
             Log.Logger.Debug("Tentando selecionar categorias...");
 
             try
             {
-                var categorias = repositorioCategoria.SelecionarTodos(id);
+                var categorias = repositorioCategoria.SelecionarTodos();
 
                 Log.Logger.Information("Categorias selecionadas com sucesso");
 

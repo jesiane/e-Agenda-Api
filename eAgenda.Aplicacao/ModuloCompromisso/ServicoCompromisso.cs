@@ -117,13 +117,13 @@ namespace eAgenda.Aplicacao.ModuloCompromisso
             return Result.Fail(compromissoResult.Errors);
         }
 
-        public Result<List<Compromisso>> SelecionarTodos(Guid usuarioId = new Guid())
+        public Result<List<Compromisso>> SelecionarTodos()
         {
             Log.Logger.Debug("Tentando selecionar compromissos...");
 
             try
             {
-                var compromissos = repositorioCompromisso.SelecionarTodos(usuarioId);
+                var compromissos = repositorioCompromisso.SelecionarTodos();
 
                 Log.Logger.Information("Compromissos selecionados com sucesso");
 
@@ -169,14 +169,14 @@ namespace eAgenda.Aplicacao.ModuloCompromisso
         }
 
 
-        public Result<List<Compromisso>> SelecionarCompromissosPassados(DateTime hoje, Guid id = new Guid())
+        public Result<List<Compromisso>> SelecionarCompromissosPassados(DateTime hoje)
         {
-            return repositorioCompromisso.SelecionarCompromissosPassados(hoje, id);
+            return repositorioCompromisso.SelecionarCompromissosPassados(hoje);
         }
 
-        public Result<List<Compromisso>> SelecionarCompromissosFuturos(DateTime dataInicial, DateTime dataFinal, Guid id = new Guid())
+        public Result<List<Compromisso>> SelecionarCompromissosFuturos(DateTime dataInicial, DateTime dataFinal)
         {
-            return repositorioCompromisso.SelecionarCompromissosFuturos(dataInicial, dataFinal, id);
+            return repositorioCompromisso.SelecionarCompromissosFuturos(dataInicial, dataFinal);
         }
     }
 }

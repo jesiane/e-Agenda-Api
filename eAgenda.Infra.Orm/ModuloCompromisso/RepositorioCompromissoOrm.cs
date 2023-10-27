@@ -21,14 +21,14 @@ namespace eAgenda.Infra.Orm.ModuloCompromisso
                 .SingleOrDefault(x => x.Id == id);
         }
 
-        public override List<Compromisso> SelecionarTodos(Guid usuarioId = new Guid())
+        public override List<Compromisso> SelecionarTodos()
         {
             return registros
                 .Include(x => x.Contato)                
                 .ToList();
         }
 
-        public List<Compromisso> SelecionarCompromissosFuturos(DateTime dataInicial, DateTime dataFinal, Guid usuarioId = new Guid())
+        public List<Compromisso> SelecionarCompromissosFuturos(DateTime dataInicial, DateTime dataFinal)
         {
             return registros
                 .Include(x => x.Contato)
@@ -37,7 +37,7 @@ namespace eAgenda.Infra.Orm.ModuloCompromisso
                 .ToList();
         }
 
-        public List<Compromisso> SelecionarCompromissosPassados(DateTime dataDeHoje, Guid usuarioId = new Guid())
+        public List<Compromisso> SelecionarCompromissosPassados(DateTime dataDeHoje)
         {
             return registros
                 .Include(x => x.Contato)

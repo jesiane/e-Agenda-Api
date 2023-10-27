@@ -22,7 +22,7 @@ namespace eAgenda.Infra.Orm.ModuloTarefa
                 .SingleOrDefault(x => x.Id == id);
         }
 
-        public List<Tarefa> SelecionarTodos(StatusTarefaEnum status, Guid usuarioId = new Guid())
+        public List<Tarefa> SelecionarTodos(StatusTarefaEnum status)
         {
             if (status == StatusTarefaEnum.Concluidas)
                 return registros                    

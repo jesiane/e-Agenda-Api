@@ -40,7 +40,7 @@ namespace eAgenda.Infra.Orm.Compartilhado
                 .SingleOrDefault(x => x.Id == id);
         }
 
-        public virtual List<TEntity> SelecionarTodos(Guid usuarioId = new Guid())
+        public virtual List<TEntity> SelecionarTodos()
         {
             return registros.ToList();
         }

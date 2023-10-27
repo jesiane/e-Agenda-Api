@@ -117,13 +117,13 @@ namespace eAgenda.Aplicacao.ModuloDespesa
             return Result.Fail(despesaResult.Errors);
         }
 
-        public Result<List<Despesa>> SelecionarTodos(Guid usuarioId = new Guid())
+        public Result<List<Despesa>> SelecionarTodos()
         {
             Log.Logger.Debug("Tentando selecionar despesas...");
 
             try
             {
-                var despesas = repositorioDespesa.SelecionarTodos(usuarioId);
+                var despesas = repositorioDespesa.SelecionarTodos();
 
                 Log.Logger.Information("Despesas selecionadas com sucesso");
 
@@ -139,13 +139,13 @@ namespace eAgenda.Aplicacao.ModuloDespesa
             }
         }
 
-        public Result<List<Despesa>> SelecionarDespesasAntigas(DateTime dataAtual, Guid usuarioId = new Guid())
+        public Result<List<Despesa>> SelecionarDespesasAntigas(DateTime dataAtual)
         {
             Log.Logger.Debug("Tentando selecionar despesas antigas...");
 
             try
             {
-                var despesas = repositorioDespesa.SelecionarDespesasAntigas(dataAtual, usuarioId);
+                var despesas = repositorioDespesa.SelecionarDespesasAntigas(dataAtual);
 
                 Log.Logger.Information("Despesas antigas selecionadas com sucesso");
 
@@ -161,13 +161,13 @@ namespace eAgenda.Aplicacao.ModuloDespesa
             }
         }
 
-        public Result<List<Despesa>> SelecionarDespesasUltimos30Dias(DateTime dataAtual, Guid usuarioId = new Guid())
+        public Result<List<Despesa>> SelecionarDespesasUltimos30Dias(DateTime dataAtual)
         {
             Log.Logger.Debug("Tentando selecionar despesas recentes...");
 
             try
             {
-                var despesas = repositorioDespesa.SelecionarDespesasUltimos30Dias(dataAtual, usuarioId);
+                var despesas = repositorioDespesa.SelecionarDespesasUltimos30Dias(dataAtual);
 
                 Log.Logger.Information("Despesas recentes selecionadas com sucesso");
 

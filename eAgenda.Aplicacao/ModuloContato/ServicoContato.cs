@@ -117,13 +117,13 @@ namespace eAgenda.Aplicacao.ModuloContato
             }
         }
 
-        public Result<List<Contato>> SelecionarTodos(StatusFavoritoEnum statusFavorito, Guid usuarioId = new Guid())
+        public Result<List<Contato>> SelecionarTodos(StatusFavoritoEnum statusFavorito)
         {
             Log.Logger.Debug("Tentando selecionar contatos...");
 
             try
             {
-                var contatos = repositorioContato.SelecionarTodos(statusFavorito, usuarioId);
+                var contatos = repositorioContato.SelecionarTodos(statusFavorito);
 
                 Log.Logger.Information("Contatos selecionados com sucesso");
 
