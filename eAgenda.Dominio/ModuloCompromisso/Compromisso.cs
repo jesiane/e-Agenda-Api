@@ -18,7 +18,7 @@ namespace eAgenda.Dominio.ModuloCompromisso
             HoraTermino = Data.TimeOfDay;
         }
 
-        public Compromisso(string assunto, string local, string link, DateTime data,
+        public Compromisso(string assunto, string local, TipoLocalizacaoCompromissoEnum tipoLocalizacao, string link, DateTime data,
              TimeSpan horaInicio, TimeSpan horaTermino, Contato contato)
         {
             Assunto = assunto;
@@ -70,6 +70,8 @@ namespace eAgenda.Dominio.ModuloCompromisso
         }
 
         public Guid? ContatoId { get; set; }
+        public string Telefone { get; set; }
+
         public override void Atualizar(Compromisso registro)
         {
             Id = registro.Id;
