@@ -7,6 +7,7 @@ using eAgenda.Infra.Orm.ModuloCompromisso;
 using eAgenda.Aplicacao.ModuloCompromisso;
 using eAgenda.Dominio.ModuloCompromisso;
 using eAgenda.WebApi.ViewModels.ModuloCompromisso;
+using eAgenda.WebApi.ViewModels.ModuloContato;
 
 namespace eAgenda.WebApi.Controllers
 {
@@ -15,7 +16,6 @@ namespace eAgenda.WebApi.Controllers
     public class CompromissoController : Controller
     {
         private ServicoCompromisso servicoCompromisso;
-
         private ServicoContato servicoContato;
 
         public CompromissoController()
@@ -57,7 +57,7 @@ namespace eAgenda.WebApi.Controllers
                     Data = c.Data,
                     HoraInicio = c.HoraInicio.ToString(@"hh\:mm\:ss"),
                     HoraTermino = c.HoraTermino.ToString(@"hh\:mm\:ss"),
-                //    NomeContato = c.Contato.NomeContato,
+                   // NomeContato = c.Contato.NomeContato,
                 };
 
                 compromissosViewModel.Add(compromissoViewModel);
@@ -67,11 +67,11 @@ namespace eAgenda.WebApi.Controllers
         }
 
         [HttpGet("{id}")]
-        public InserirCompromissoViewModel SeleciontarPorId(Guid id)
+        public FormsCompromissoViewModel SeleciontarPorId(Guid id)
         {
             var compromisso = servicoCompromisso.SelecionarPorId(id).Value;
 
-            var compromissoViewModel = new InserirCompromissoViewModel
+            var compromissoViewModel = new FormsCompromissoViewModel
             {
                 Assunto = compromisso.Assunto,
                 Data = compromisso.Data,
@@ -125,7 +125,7 @@ namespace eAgenda.WebApi.Controllers
         }
 
         [HttpPost]
-        public string Inserir(InserirCompromissoViewModel compromissoViewModel)
+        public string Inserir(FormsCompromissoViewModel compromissoViewModel)
         {
             Compromisso compromisso = new Compromisso
             {
@@ -164,7 +164,7 @@ namespace eAgenda.WebApi.Controllers
         }
 
         [HttpPut("{id}")]
-        public string Editar(Guid id, InserirCompromissoViewModel compromissoViewModel)
+        public string Editar(Guid id, FormsCompromissoViewModel compromissoViewModel)
         {
             var resultadoBusca = servicoCompromisso.SelecionarPorId(id);
 

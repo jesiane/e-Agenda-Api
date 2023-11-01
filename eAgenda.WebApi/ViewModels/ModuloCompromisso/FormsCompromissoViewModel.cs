@@ -2,9 +2,8 @@
 
 namespace eAgenda.WebApi.ViewModels.ModuloCompromisso
 {
-    public class InserirCompromissoViewModel
+    public class FormsCompromissoViewModel
     {
-       // public Guid Id { get; set; }
         public string Assunto { get; set; }
         public string Local { get; set; }
         public TipoLocalizacaoCompromissoEnum TipoLocalizacao { get;set; }  

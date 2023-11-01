@@ -2,9 +2,9 @@
 
 namespace eAgenda.WebApi.ViewModels.ModuloDespesa
 {
-    public class InserirDespesaViewModel
+    public class FormsDespesaViewModel
     {
-        public InserirDespesaViewModel()
+        public FormsDespesaViewModel()
         { 
             CategoriasSelecionadas = new List<Guid>();
         }

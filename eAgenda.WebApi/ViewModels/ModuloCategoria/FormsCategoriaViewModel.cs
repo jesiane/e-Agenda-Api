@@ -1,6 +1,6 @@
 ﻿namespace eAgenda.WebApi.ViewModels.ModuloCategoria
 {
-    public class InserirCategoriaViewModel
+    public class FormsCategoriaViewModel
     {
         public string Titulo { get; set; }
     }

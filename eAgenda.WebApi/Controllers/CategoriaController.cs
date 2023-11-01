@@ -88,7 +88,7 @@ namespace eAgenda.WebApi.Controllers
         }
 
         [HttpPost]
-        public string Inserir(InserirCategoriaViewModel categoriaViewModel)
+        public string Inserir(FormsCategoriaViewModel categoriaViewModel)
         {
             var categoria = new Categoria();
 
@@ -103,7 +103,7 @@ namespace eAgenda.WebApi.Controllers
         }
 
         [HttpPut("{id}")]
-        public string Editar(Guid id, EditarCategoriaViewModel categoriaViewModel)
+        public string Editar(Guid id, FormsCategoriaViewModel categoriaViewModel)
         {
             var categoria = servicoCategoria.SelecionarPorId(id).Value;
 

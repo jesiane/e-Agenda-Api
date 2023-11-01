@@ -71,11 +71,11 @@ namespace eAgenda.WebApi.Controllers
         }
 
         [HttpGet("{id}")]
-        public InserirDespesaViewModel SeleciontarPorId(Guid id)
+        public FormsDespesaViewModel SeleciontarPorId(Guid id)
         {
             var despesa = servicoDespesa.SelecionarPorId(id).Value;
 
-            var despesaViewModel = new InserirDespesaViewModel
+            var despesaViewModel = new FormsDespesaViewModel
             {
                 Descricao = despesa.Descricao,
                 Valor = despesa.Valor,
@@ -121,7 +121,7 @@ namespace eAgenda.WebApi.Controllers
 
 
         [HttpPost]
-        public string Inserir(InserirDespesaViewModel despesaViewModel)
+        public string Inserir(FormsDespesaViewModel despesaViewModel)
         {
             Despesa despesa = new Despesa
             {
@@ -156,7 +156,7 @@ namespace eAgenda.WebApi.Controllers
         }
 
         [HttpPut("{id}")]
-        public string Editar(Guid id, EditarDespesaViewModel despesaViewModel)
+        public string Editar(Guid id, FormsDespesaViewModel despesaViewModel)
         {
             var resultadoBusca = servicoDespesa.SelecionarPorId(id);
 

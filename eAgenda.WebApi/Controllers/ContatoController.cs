@@ -94,7 +94,7 @@ namespace eAgenda.WebApi.Controllers
         }
 
         [HttpPost]
-        public string Inserir(InserirContatoViewModel contatoViewModel)
+        public string Inserir(FormsContatoViewModel contatoViewModel)
         {
             var contato = new Contato(contatoViewModel.Nome, contatoViewModel.Email, contatoViewModel.Telefone,
                 contatoViewModel.Empresa, contatoViewModel.Cargo);
@@ -110,7 +110,7 @@ namespace eAgenda.WebApi.Controllers
         }
 
         [HttpPut("{id}")]
-        public string Editar(Guid id, EditarContatoViewModel contatoViewModel)
+        public string Editar(Guid id, FormsContatoViewModel contatoViewModel)
         {
             var contato = servicoContato.SelecionarPorId(id).Value;
 
