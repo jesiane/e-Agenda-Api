@@ -34,7 +34,7 @@ namespace eAgenda.Dominio.ModuloCompromisso
 
         public string Local { get; set; }
 
-        public TipoLocalizacaoCompromissoEnum TipoLocal
+        public TipoLocalizacaoCompromissoEnum TipoLocalizacao
         {
             get { return _compromissoEnum; }
             set
@@ -90,7 +90,7 @@ namespace eAgenda.Dominio.ModuloCompromisso
                    Id == compromisso.Id &&
                    Assunto == compromisso.Assunto &&
                    Local == compromisso.Local &&
-                   TipoLocal == compromisso.TipoLocal &&
+                   TipoLocalizacao == compromisso.TipoLocalizacao &&
                    Link == compromisso.Link &&
                    Data == compromisso.Data &&
                    HoraInicio.Equals(compromisso.HoraInicio) &&
@@ -109,7 +109,7 @@ namespace eAgenda.Dominio.ModuloCompromisso
             hash.Add(Id);
             hash.Add(Assunto);
             hash.Add(Local);
-            hash.Add(TipoLocal);
+            hash.Add(TipoLocalizacao);
             hash.Add(Link);
             hash.Add(Data);
             hash.Add(HoraInicio);

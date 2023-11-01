@@ -1,4 +1,5 @@
-﻿using eAgenda.Dominio.ModuloContato;
+﻿using eAgenda.Dominio.ModuloCompromisso;
+using eAgenda.Dominio.ModuloContato;
 
 namespace eAgenda.WebApi.ViewModels.ModuloCompromisso
 {
@@ -7,6 +8,8 @@ namespace eAgenda.WebApi.ViewModels.ModuloCompromisso
         public Guid Id { get; set; }
         public string Assunto { get; set; }
         public string Local { get; set; }
+
+        public TipoLocalizacaoCompromissoEnum TipoLocalizacao { get; set; }
         public string Link { get; set; }
         public DateTime Data { get; set; }
         public string HoraInicio { get; set; }

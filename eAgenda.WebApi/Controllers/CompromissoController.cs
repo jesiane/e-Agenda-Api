@@ -5,8 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using eAgenda.Infra.Orm.ModuloCompromisso;
 using eAgenda.Aplicacao.ModuloCompromisso;
-using eAgenda.Dominio.ModuloContato;
-using eAgenda.WebApi.ViewModels.ModuloContato;
 using eAgenda.Dominio.ModuloCompromisso;
 using eAgenda.WebApi.ViewModels.ModuloCompromisso;
 
@@ -16,8 +14,9 @@ namespace eAgenda.WebApi.Controllers
     [Route("api/compromissos")]
     public class CompromissoController : Controller
     {
-       private ServicoCompromisso servicoCompromisso;
-       private ServicoContato servicoContato;
+        private ServicoCompromisso servicoCompromisso;
+
+        private ServicoContato servicoContato;
 
         public CompromissoController()
         {
@@ -36,34 +35,59 @@ namespace eAgenda.WebApi.Controllers
 
             var repositorioCompromisso = new RepositorioCompromissoOrm(contextoPersistencia);
 
-            servicoCompromisso = new ServicoCompromisso(repositorioCompromisso, contextoPersistencia);
-        }
+            var repositorioContato = new RepositorioContatoOrm(contextoPersistencia);
 
+            servicoCompromisso = new ServicoCompromisso(repositorioCompromisso, contextoPersistencia);
+
+            servicoContato = new ServicoContato(repositorioContato, contextoPersistencia);
+        }
         [HttpGet]
-        public List<ListarCompromissoViewModel> SeleciontarTodos(StatusCompromissoEnum statusCompromisso)
+        public List<ListarCompromissoViewModel> SeleciontarTodos()
         {
-            var compromissos = servicoCompromisso.SelecionarTodos(statusCompromisso).Value;
+            var compromissos = servicoCompromisso.SelecionarTodos().Value;
 
             var compromissosViewModel = new List<ListarCompromissoViewModel>();
 
-            foreach (var compromisso in compromissos)
+            foreach (var c in compromissos)
             {
                 var compromissoViewModel = new ListarCompromissoViewModel
                 {
-                    Id = compromisso.Id,
-                    Assunto = compromisso.Assunto,
-                    Data = compromisso.Data,
-                    HoraInicio = compromisso.HoraInicio.ToString(@"hh\:mm\:ss"),
-                    HoraTermino = compromisso.HoraTermino.ToString(@"hh\:mm\:ss"),
-                    NomeContato = compromisso.Contato,
-            };
+                    Id = c.Id,
+                    Assunto = c.Assunto,
+                    Data = c.Data,
+                    HoraInicio = c.HoraInicio.ToString(@"hh\:mm\:ss"),
+                    HoraTermino = c.HoraTermino.ToString(@"hh\:mm\:ss"),
+                //    NomeContato = c.Contato.NomeContato,
+                };
+
                 compromissosViewModel.Add(compromissoViewModel);
             }
+
             return compromissosViewModel;
         }
-        
-          [HttpGet("visualizacao-completa/{id}")]
-        public VisualizarCompromissoViewModel SelecionarPorId(Guid id)
+
+        [HttpGet("{id}")]
+        public InserirCompromissoViewModel SeleciontarPorId(Guid id)
+        {
+            var compromisso = servicoCompromisso.SelecionarPorId(id).Value;
+
+            var compromissoViewModel = new InserirCompromissoViewModel
+            {
+                Assunto = compromisso.Assunto,
+                Data = compromisso.Data,
+                Local = compromisso.Local,
+                TipoLocalizacao = compromisso.TipoLocalizacao,
+                Link = compromisso.Link,
+                HoraInicio = compromisso.HoraInicio.ToString(@"hh\:mm\:ss"),
+                HoraTermino = compromisso.HoraTermino.ToString(@"hh\:mm\:ss"),
+                ContatoId = compromisso.Contato.Id
+            };
+
+            return compromissoViewModel;
+        }
+
+        [HttpGet("visualizacao-completa/{id}")]
+        public VisualizarCompromissoViewModel SeleciontarPorIdCompleto(Guid id)
         {
             var compromisso = servicoCompromisso.SelecionarPorId(id).Value;
 
@@ -71,24 +95,31 @@ namespace eAgenda.WebApi.Controllers
             {
                 Id = compromisso.Id,
                 Assunto = compromisso.Assunto,
-                Local = compromisso.Local,
-                Link = compromisso.Link,
                 Data = compromisso.Data,
-                Telefone = compromisso.Telefone,
-                HoraInicio = compromisso.HoraInicio.ToString(@"dd\:mm\:ss"),
-                HoraTermino = compromisso.HoraTermino.ToString(@"dd\:mm\:ss"),
-            };
-            var contatoViewModel = new ListarContatoViewModel
-            {
-                Id = compromisso.Id,
-                Nome = compromisso.Contato.Nome,
-                Email = compromisso.Contato.Email,
-                Telefone = compromisso.Contato.Telefone,
-                Empresa = compromisso.Contato.Empresa,
-                Cargo = compromisso.Contato.Cargo,
+                Local = compromisso.Local,
+                TipoLocalizacao = compromisso.TipoLocalizacao,
+                Link = compromisso.Link,
+                HoraInicio = compromisso.HoraInicio.ToString(@"hh\:mm\:ss"),
+                HoraTermino = compromisso.HoraTermino.ToString(@"hh\:mm\:ss"),
             };
 
-       //     compromissoViewModel.Contatos.Add(contatoViewModel);
+
+            //if (compromisso.Contato != null)
+            //{
+            //    var contato = compromisso.Contato;
+
+            //    var contatoViewModel = new ListarContatoViewModel
+            //    {
+            //        Id = contato.Id,
+            //        Nome = contato.Nome,
+            //        Cargo = contato.Cargo,
+            //        Empresa = contato.Empresa,
+            //        Email = contato.Email,
+            //        Telefone = contato.Telefone,
+            //    };
+
+            //    compromissoViewModel.Contato = contatoViewModel;
+            //}
 
             return compromissoViewModel;
         }
@@ -96,10 +127,32 @@ namespace eAgenda.WebApi.Controllers
         [HttpPost]
         public string Inserir(InserirCompromissoViewModel compromissoViewModel)
         {
-            var compromisso = new Compromisso(compromissoViewModel.Assunto,
-                compromissoViewModel.Local, compromissoViewModel.TipoLocalizacao,
-                compromissoViewModel.Link, compromissoViewModel.Data,
-                compromissoViewModel.HoraInicio, compromissoViewModel.HoraTermino, Contato);
+            Compromisso compromisso = new Compromisso
+            {
+                Assunto = compromissoViewModel.Assunto,
+                Data = compromissoViewModel.Data,
+                Local = compromissoViewModel.Local,
+                TipoLocalizacao = compromissoViewModel.TipoLocalizacao,
+                Link = compromissoViewModel.Link,
+                HoraInicio = (Convert.ToDateTime(compromissoViewModel.HoraInicio)).TimeOfDay,
+                HoraTermino = (Convert.ToDateTime(compromissoViewModel.HoraTermino)).TimeOfDay
+            };
+
+            if (compromissoViewModel.ContatoId != null)
+            {
+                var resultadoBusca =
+                    servicoContato.SelecionarPorId(compromissoViewModel.ContatoId);
+
+                if (resultadoBusca.IsFailed)
+                {
+
+                    string[] errosBusca = resultadoBusca.Errors.Select(x => x.Message).ToArray();
+
+                    return string.Join("\r\n", errosBusca);
+                }
+
+                compromisso.Contato = resultadoBusca.Value;
+            }
 
             var resultado = servicoCompromisso.Inserir(compromisso);
 
@@ -107,34 +160,57 @@ namespace eAgenda.WebApi.Controllers
                 return "Compromisso inserido com sucesso";
 
             string[] erros = resultado.Errors.Select(x => x.Message).ToArray();
-
             return string.Join("\r\n", erros);
         }
 
-
-        //AQUI
-
         [HttpPut("{id}")]
-        public string Editar(Guid id, EditarCompromissoViewModel compromissoViewModel)
+        public string Editar(Guid id, InserirCompromissoViewModel compromissoViewModel)
         {
-            var compromisso = servicoCompromisso.SelecionarPorId(id).Value;
+            var resultadoBusca = servicoCompromisso.SelecionarPorId(id);
+
+            if (resultadoBusca.IsFailed)
+            {
+                string[] errosBusca = resultadoBusca.Errors.Select(x => x.Message).ToArray();
+
+                return string.Join("\r\n", errosBusca);
+            }
+
+            var compromisso = resultadoBusca.Value;
 
             compromisso.Assunto = compromissoViewModel.Assunto;
-            compromisso.Local = compromissoViewModel.Local;
-            compromisso.Link = compromissoViewModel.Link;
             compromisso.Data = compromissoViewModel.Data;
-            compromisso.HoraInicio = compromissoViewModel.HoraInicio.ToString;
-            compromisso.HoraTermino = compromissoViewModel.HoraTermino.ToString;
+            compromisso.Local = compromissoViewModel.Local;
+            compromisso.TipoLocalizacao = compromissoViewModel.TipoLocalizacao;
+            compromisso.Link = compromissoViewModel.Link;
+            compromisso.HoraInicio = (Convert.ToDateTime(compromissoViewModel.HoraInicio)).TimeOfDay;
+            compromisso.HoraTermino = (Convert.ToDateTime(compromissoViewModel.HoraTermino)).TimeOfDay;
+
+            if (compromissoViewModel.ContatoId != null)
+            {
+                var resultadoBuscaContato =
+                    servicoContato.SelecionarPorId(compromissoViewModel.ContatoId);
+
+                if (resultadoBuscaContato.IsFailed)
+                {
+
+                    string[] errosBuscaContato = resultadoBuscaContato.Errors.Select(x => x.Message).ToArray();
+
+                    return string.Join("\r\n", errosBuscaContato);
+                }
+
+                compromisso.Contato = resultadoBuscaContato.Value;
+            }
 
             var resultado = servicoCompromisso.Editar(compromisso);
 
             if (resultado.IsSuccess)
-                return "Contato editado com sucesso";
+                return "Compromisso editado com sucesso";
 
             string[] erros = resultado.Errors.Select(x => x.Message).ToArray();
 
             return string.Join("\r\n", erros);
         }
+
 
         [HttpDelete("{id}")]
         public string Excluir(Guid id)
@@ -143,14 +219,13 @@ namespace eAgenda.WebApi.Controllers
 
             if (resultadoBusca.IsFailed)
             {
-                string[] errosNaBusca = resultadoBusca.Errors.Select(x => x.Message).ToArray();
 
-                return string.Join("\r\n", errosNaBusca);
+                string[] errosBusca = resultadoBusca.Errors.Select(x => x.Message).ToArray();
+
+                return string.Join("\r\n", errosBusca);
             }
 
-            var compromisso = resultadoBusca.Value;
-
-            var resultado = servicoCompromisso.Excluir(compromisso);
+            var resultado = servicoCompromisso.Excluir(id);
 
             if (resultado.IsSuccess)
                 return "Compromisso excluído com sucesso";
