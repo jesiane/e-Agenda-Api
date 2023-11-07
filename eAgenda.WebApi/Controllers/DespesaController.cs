@@ -1,17 +1,12 @@
-﻿using eAgenda.Aplicacao.ModuloCompromisso;
-using eAgenda.Aplicacao.ModuloContato;
-using eAgenda.Aplicacao.ModuloDespesa;
-using eAgenda.Infra.Orm.ModuloCompromisso;
-using eAgenda.Infra.Orm.ModuloContato;
+﻿using eAgenda.Aplicacao.ModuloDespesa;
 using eAgenda.Infra.Orm;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using eAgenda.Infra.Orm.ModuloDespesa;
-using eAgenda.WebApi.ViewModels.ModuloCompromisso;
+
 using eAgenda.Dominio.ModuloDespesa;
 using eAgenda.WebApi.ViewModels.ModuloDespesa;
 using eAgenda.WebApi.ViewModels.ModuloCategoria;
-using eAgenda.Dominio.ModuloCompromisso;
 
 namespace eAgenda.WebApi.Controllers
 {

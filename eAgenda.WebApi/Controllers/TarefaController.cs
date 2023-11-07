@@ -3,26 +3,24 @@ using eAgenda.Infra.Orm.ModuloTarefa;
 using eAgenda.Infra.Orm;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using eAgenda.Aplicacao.ModuloContato;
-using eAgenda.Dominio.ModuloContato;
-using eAgenda.WebApi.ViewModels.ModuloContato;
 using eAgenda.Dominio.ModuloTarefa;
 using eAgenda.WebApi.ViewModels.ModuloTarefa;
-using eAgenda.WebApi.ViewModels.ModuloCompromisso;
+
 
 namespace eAgenda.WebApi.Controllers
 {
+    [Route("api/[controller]")]
     [ApiController]
-    [Route("api/tarefas")]
-    public class TarefaController : Controller
+    public class TarefaController : ControllerBase
     {
         private ServicoTarefa servicoTarefa;
+
         public TarefaController()
         {
             IConfiguration configuracao = new ConfigurationBuilder()
-             .SetBasePath(Directory.GetCurrentDirectory())
-             .AddJsonFile("appsettings.json")
-             .Build();
+              .SetBasePath(Directory.GetCurrentDirectory())
+              .AddJsonFile("appsettings.json")
+              .Build();
 
             var connectionString = configuracao.GetConnectionString("SqlServer");
 
@@ -38,17 +36,21 @@ namespace eAgenda.WebApi.Controllers
         }
 
         [HttpGet]
-        public List<ListarTarefaViewModel> SeleciontarTodos(StatusTarefaEnum statusTarefa)
+        public List<ListarTarefaViewModel> SeleciontarTodos(StatusTarefaEnum statusTarefaEnum)
         {
-            var tarefas = servicoTarefa.SelecionarTodos(statusTarefa).Value;
+            var tarefas = servicoTarefa.SelecionarTodos(statusTarefaEnum).Value;
 
             var tarefasViewModel = new List<ListarTarefaViewModel>();
 
-            foreach (var tarefa in tarefas)
+            foreach (var t in tarefas)
             {
                 var tarefaViewModel = new ListarTarefaViewModel
                 {
-                    Id = tarefa.Id,                  
+                    Id = t.Id,
+                    Titulo = t.Titulo,
+                    DataCriacao = t.DataCriacao,
+                    Prioridade = t.Prioridade.ToString(),
+                    Situacao = t.PercentualConcluido == 100 ? "Concluído" : "Pendente"
                 };
 
                 tarefasViewModel.Add(tarefaViewModel);
@@ -57,46 +59,152 @@ namespace eAgenda.WebApi.Controllers
             return tarefasViewModel;
         }
 
-        [HttpGet("visualizacao-completa/{id}")]
-        public VisualizarTarefaViewModel SeleciontarPorId(Guid id)
+        [HttpGet("{id}")]
+        public FormsTarefaViewModel SeleciontarPorId(Guid id)
         {
             var tarefa = servicoTarefa.SelecionarPorId(id).Value;
 
-            var tarefasViewModel = new VisualizarTarefaViewModel
+            var tarefaViewModel = new FormsTarefaViewModel
             {
-                Id = tarefa.Id,
+                Titulo = tarefa.Titulo,
+
+                Prioridade = tarefa.Prioridade,
             };
-            return tarefasViewModel;
+
+            foreach (var i in tarefa.Itens)
+            {
+                var item = new FormsItemTarefaViewModel
+                {
+                    Id = i.Id,
+                    Titulo = i.Titulo,
+                    Status = 0,
+                    Concluido = i.Concluido,
+                };
+
+                tarefaViewModel.Itens.Add(item);
+            }
+
+            return tarefaViewModel;
         }
 
+        [HttpGet("visualizacao-completa/{id}")]
+        public VisualizarTarefaViewModel SeleciontarPorIdCompleto(Guid id)
+        {
+            var tarefa = servicoTarefa.SelecionarPorId(id).Value;
+
+            var tarefaViewModel = new VisualizarTarefaViewModel
+            {
+                Id = tarefa.Id,
+                Titulo = tarefa.Titulo,
+                DataCriacao = tarefa.DataCriacao,
+                DataConclusao = tarefa.DataConclusao,
+                QuantidadeItens = tarefa.Itens.Count(),
+                PercentualConcluido = tarefa.PercentualConcluido,
+                Prioridade = tarefa.Prioridade.ToString(),
+                Situacao = tarefa.PercentualConcluido == 100 ? "Concluído" : "Pendente"
+            };
+
+            foreach (var i in tarefa.Itens)
+            {
+
+                var item = new VisualizarItemTarefaViewModel
+                {
+                    Titulo = i.Titulo,
+                    Situacao = i.Concluido ? "Concluído" : "Pendente",
+                };
+
+                tarefaViewModel.Itens.Add(item);
+            }
+
+            return tarefaViewModel;
+        }
 
         [HttpPost]
-        public string Inserir(InserirTarefaViewModel contatoViewModel)
+        public string Inserir(FormsTarefaViewModel tarefaViewModel)
         {
-            var tarefa = new Tarefa();
+            Tarefa tarefa = new Tarefa
+            {
+                Titulo = tarefaViewModel.Titulo,
+                Prioridade = tarefaViewModel.Prioridade,
+            };
+
+            foreach (var i in tarefaViewModel.Itens)
+            {
+                if (i.Status.Equals(StatusItemTarefa.Adicionado))
+                {
+                    var item = new ItemTarefa
+                    {
+                        Titulo = i.Titulo,
+                        Concluido = i.Concluido
+                    };
+
+                    tarefa.AdicionarItem(item);
+                }
+            }
+
+            servicoTarefa.AtualizarItens
+            (
+                tarefa, tarefa.Itens.FindAll(i => i.Concluido),
+                tarefa.Itens.FindAll(i => !i.Concluido)
+            );
 
             var resultado = servicoTarefa.Inserir(tarefa);
 
             if (resultado.IsSuccess)
-                return "Contato inserido com sucesso";
+                return "Tarefa inserida com sucesso";
 
             string[] erros = resultado.Errors.Select(x => x.Message).ToArray();
 
             return string.Join("\r\n", erros);
         }
 
-
         [HttpPut("{id}")]
-        public string Editar(Guid id, EditarTarefaViewModel tarefaViewModel)
+        public string Editar(Guid id, FormsTarefaViewModel tarefaViewModel)
         {
-            var tarefa = servicoTarefa.SelecionarPorId(id).Value;
+            var resultadoBusca = servicoTarefa.SelecionarPorId(id);
+
+            if (resultadoBusca.IsFailed)
+            {
+
+                string[] errosBusca = resultadoBusca.Errors.Select(x => x.Message).ToArray();
+
+                return string.Join("\r\n", errosBusca);
+            }
+
+            var tarefa = resultadoBusca.Value;
 
             tarefa.Titulo = tarefaViewModel.Titulo;
-        
+            tarefa.Prioridade = tarefaViewModel.Prioridade;
+
+            foreach (var i in tarefaViewModel.Itens)
+            {
+                if (i.Status.Equals(StatusItemTarefa.Adicionado))
+                {
+                    var item = new ItemTarefa
+                    {
+                        Titulo = i.Titulo,
+                        Concluido = i.Concluido
+                    };
+
+                    tarefa.AdicionarItem(item);
+                }
+
+                else if (i.Status.Equals(StatusItemTarefa.Removido))
+                {
+                    tarefa.RemoverItem(i.Id);
+                }
+            }
+
+            servicoTarefa.AtualizarItens
+            (
+                tarefa, tarefa.Itens.FindAll(i => i.Concluido),
+                tarefa.Itens.FindAll(i => !i.Concluido)
+            );
+
             var resultado = servicoTarefa.Editar(tarefa);
 
             if (resultado.IsSuccess)
-                return "Contato editado com sucesso";
+                return "Tarefa editada com sucesso";
 
             string[] erros = resultado.Errors.Select(x => x.Message).ToArray();
 
@@ -110,17 +218,15 @@ namespace eAgenda.WebApi.Controllers
 
             if (resultadoBusca.IsFailed)
             {
-                string[] errosNaBusca = resultadoBusca.Errors.Select(x => x.Message).ToArray();
+                string[] errosBusca = resultadoBusca.Errors.Select(x => x.Message).ToArray();
 
-                return string.Join("\r\n", errosNaBusca);
+                return string.Join("\r\n", errosBusca);
             }
 
-            var contato = resultadoBusca.Value;
-
-            var resultado = servicoTarefa.Excluir(contato);
+            var resultado = servicoTarefa.Excluir(id);
 
             if (resultado.IsSuccess)
-                return "Contato excluído com sucesso";
+                return "Tarefa excluída com sucesso";
 
             string[] erros = resultado.Errors.Select(x => x.Message).ToArray();
 

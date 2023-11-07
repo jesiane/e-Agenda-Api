@@ -1,6 +1,5 @@
 ﻿using eAgenda.Aplicacao.ModuloContato;
 using eAgenda.Dominio.ModuloContato;
-
 using eAgenda.Infra.Orm;
 using eAgenda.Infra.Orm.ModuloContato;
 using eAgenda.WebApi.ViewModels.ModuloCompromisso;
@@ -11,8 +10,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace eAgenda.WebApi.Controllers
 {
+    [Route("api/[controller]")]
     [ApiController]
-    [Route("api/contatos")]
     public class ContatoController : ControllerBase
     {
         private ServicoContato servicoContato;
@@ -38,21 +37,23 @@ namespace eAgenda.WebApi.Controllers
         }
 
         [HttpGet]
-        public List<ListarContatoViewModel> SeleciontarTodos(StatusFavoritoEnum statusFavorito)
+        public List<ListarContatoViewModel> SeleciontarTodos(StatusFavoritoEnum statusFavoritoEnum)
         {
-            var contatos = servicoContato.SelecionarTodos(statusFavorito).Value;
+            var contatos = servicoContato.SelecionarTodos(statusFavoritoEnum).Value;
 
             var contatosViewModel = new List<ListarContatoViewModel>();
 
-            foreach (var contato in contatos)
+            foreach (var c in contatos)
             {
                 var contatoViewModel = new ListarContatoViewModel
                 {
-                    Id = contato.Id,
-                    Nome = contato.Nome,
-                    Empresa = contato.Empresa,
-                    Cargo = contato.Cargo,
-                    Telefone = contato.Telefone
+                    Id = c.Id,
+                    Nome = c.Nome,
+                    Cargo = c.Cargo,
+                    Empresa = c.Empresa,
+                    Email = c.Email,
+                    Telefone = c.Telefone,
+                    Favorito = c.Favorito,
                 };
 
                 contatosViewModel.Add(contatoViewModel);
@@ -61,8 +62,26 @@ namespace eAgenda.WebApi.Controllers
             return contatosViewModel;
         }
 
+        [HttpGet("{id}")]
+        public FormsContatoViewModel SeleciontarPorId(Guid id)
+        {
+            var contato = servicoContato.SelecionarPorId(id).Value;
+
+            var contatoViewModel = new FormsContatoViewModel
+            {
+                Nome = contato.Nome,
+                Cargo = contato.Cargo,
+                Empresa = contato.Empresa,
+                Email = contato.Email,
+                Telefone = contato.Telefone,
+                Favorito = contato.Favorito
+            };
+
+            return contatoViewModel;
+        }
+
         [HttpGet("visualizacao-completa/{id}")]
-        public VisualizarContatoViewModel SeleciontarPorId(Guid id)
+        public VisualizarContatoViewModel SeleciontarPorIdCompleto(Guid id)
         {
             var contato = servicoContato.SelecionarPorId(id).Value;
 
@@ -70,24 +89,27 @@ namespace eAgenda.WebApi.Controllers
             {
                 Id = contato.Id,
                 Nome = contato.Nome,
-                Empresa = contato.Empresa,
                 Cargo = contato.Cargo,
+                Empresa = contato.Empresa,
                 Email = contato.Email,
-                Telefone = contato.Telefone
+                Telefone = contato.Telefone,
+                Favorito = contato.Favorito
             };
 
             foreach (var c in contato.Compromissos)
             {
+
                 var compromissoViewModel = new ListarCompromissoViewModel
                 {
                     Id = c.Id,
                     Assunto = c.Assunto,
                     Data = c.Data,
                     HoraInicio = c.HoraInicio.ToString(@"hh\:mm\:ss"),
-                    HoraTermino = c.HoraTermino.ToString(@"hh\:mm\:ss")
+                    HoraTermino = c.HoraTermino.ToString(@"hh\:mm\:ss"),
+                    NomeContato = contato.Nome
                 };
 
-                contatoViewModel.Compromissos.Add(compromissoViewModel);
+                contatoViewModel.ListarCompromissosViewModel.Add(compromissoViewModel);
             }
 
             return contatoViewModel;
@@ -96,8 +118,15 @@ namespace eAgenda.WebApi.Controllers
         [HttpPost]
         public string Inserir(FormsContatoViewModel contatoViewModel)
         {
-            var contato = new Contato(contatoViewModel.Nome, contatoViewModel.Email, contatoViewModel.Telefone,
-                contatoViewModel.Empresa, contatoViewModel.Cargo);
+            Contato contato = new Contato
+            {
+                Nome = contatoViewModel.Nome,
+                Email = contatoViewModel.Email,
+                Telefone = contatoViewModel.Telefone,
+                Cargo = contatoViewModel.Cargo,
+                Empresa = contatoViewModel.Empresa,
+                Favorito = contatoViewModel.Favorito
+            };
 
             var resultado = servicoContato.Inserir(contato);
 
@@ -112,18 +141,54 @@ namespace eAgenda.WebApi.Controllers
         [HttpPut("{id}")]
         public string Editar(Guid id, FormsContatoViewModel contatoViewModel)
         {
-            var contato = servicoContato.SelecionarPorId(id).Value;
+            var resultadoBusca = servicoContato.SelecionarPorId(id);
+
+            if (resultadoBusca.IsFailed)
+            {
+
+                string[] errosBusca = resultadoBusca.Errors.Select(x => x.Message).ToArray();
+
+                return string.Join("\r\n", errosBusca);
+            }
+
+            var contato = resultadoBusca.Value;
 
             contato.Nome = contatoViewModel.Nome;
             contato.Email = contatoViewModel.Email;
             contato.Telefone = contatoViewModel.Telefone;
-            contato.Empresa = contatoViewModel.Empresa;
             contato.Cargo = contatoViewModel.Cargo;
+            contato.Empresa = contatoViewModel.Empresa;
+            contato.Favorito = contatoViewModel.Favorito;
 
             var resultado = servicoContato.Editar(contato);
 
             if (resultado.IsSuccess)
                 return "Contato editado com sucesso";
+
+            string[] erros = resultado.Errors.Select(x => x.Message).ToArray();
+
+            return string.Join("\r\n", erros);
+        }
+
+        [HttpPut("favoritos/{id}")]
+        public string MudarFavorito(Guid id)
+        {
+            var resultadoBusca = servicoContato.SelecionarPorId(id);
+
+            if (resultadoBusca.IsFailed)
+            {
+
+                string[] errosBusca = resultadoBusca.Errors.Select(x => x.Message).ToArray();
+
+                return string.Join("\r\n", errosBusca);
+            }
+
+            var contato = resultadoBusca.Value;
+
+            var resultado = servicoContato.ConfigurarFavoritos(contato);
+
+            if (resultado.IsSuccess)
+                return "Contato alterado favorito com sucesso";
 
             string[] erros = resultado.Errors.Select(x => x.Message).ToArray();
 
@@ -137,14 +202,13 @@ namespace eAgenda.WebApi.Controllers
 
             if (resultadoBusca.IsFailed)
             {
-                string[] errosNaBusca = resultadoBusca.Errors.Select(x => x.Message).ToArray();
 
-                return string.Join("\r\n", errosNaBusca);
+                string[] errosBusca = resultadoBusca.Errors.Select(x => x.Message).ToArray();
+
+                return string.Join("\r\n", errosBusca);
             }
 
-            var contato = resultadoBusca.Value;
-
-            var resultado = servicoContato.Excluir(contato);
+            var resultado = servicoContato.Excluir(id);
 
             if (resultado.IsSuccess)
                 return "Contato excluído com sucesso";
@@ -153,6 +217,5 @@ namespace eAgenda.WebApi.Controllers
 
             return string.Join("\r\n", erros);
         }
-
     }
 }

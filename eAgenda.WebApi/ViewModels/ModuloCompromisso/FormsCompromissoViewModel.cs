@@ -6,7 +6,7 @@ namespace eAgenda.WebApi.ViewModels.ModuloCompromisso
     {
         public string Assunto { get; set; }
         public string Local { get; set; }
-        public TipoLocalizacaoCompromissoEnum TipoLocalizacao { get;set; }  
+        public TipoLocalizacaoCompromissoEnum TipoLocal { get;set; }  
         public string? Link { get; set; }
         public DateTime Data { get; set; }
         public string HoraInicio { get; set; }

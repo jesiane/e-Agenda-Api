@@ -7,7 +7,7 @@ namespace eAgenda.WebApi.ViewModels.ModuloContato
     {
         public VisualizarContatoViewModel()
         {
-            Compromissos = new List<ListarCompromissoViewModel>();
+            ListarCompromissosViewModel = new List<ListarCompromissoViewModel>();
         }
 
         public Guid Id { get; set; }
@@ -16,8 +16,9 @@ namespace eAgenda.WebApi.ViewModels.ModuloContato
         public string Cargo { get; set; }
         public string Email { get; set; }
         public string Telefone { get; set; }
+        public bool Favorito { get; set; }
 
-        public List<ListarCompromissoViewModel> Compromissos { get; set; }
+        public List<ListarCompromissoViewModel> ListarCompromissosViewModel { get; set; }
 
     }
 }

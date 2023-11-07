@@ -11,11 +11,12 @@ using eAgenda.WebApi.ViewModels.ModuloContato;
 
 namespace eAgenda.WebApi.Controllers
 {
+    [Route("api/[controller]")]
     [ApiController]
-    [Route("api/compromissos")]
-    public class CompromissoController : Controller
+    public class CompromissoController : ControllerBase
     {
         private ServicoCompromisso servicoCompromisso;
+
         private ServicoContato servicoContato;
 
         public CompromissoController()
@@ -57,7 +58,7 @@ namespace eAgenda.WebApi.Controllers
                     Data = c.Data,
                     HoraInicio = c.HoraInicio.ToString(@"hh\:mm\:ss"),
                     HoraTermino = c.HoraTermino.ToString(@"hh\:mm\:ss"),
-                   // NomeContato = c.Contato.NomeContato,
+                    NomeContato = c.Contato.Nome
                 };
 
                 compromissosViewModel.Add(compromissoViewModel);
@@ -76,7 +77,7 @@ namespace eAgenda.WebApi.Controllers
                 Assunto = compromisso.Assunto,
                 Data = compromisso.Data,
                 Local = compromisso.Local,
-                TipoLocalizacao = compromisso.TipoLocalizacao,
+                TipoLocal = compromisso.TipoLocal,
                 Link = compromisso.Link,
                 HoraInicio = compromisso.HoraInicio.ToString(@"hh\:mm\:ss"),
                 HoraTermino = compromisso.HoraTermino.ToString(@"hh\:mm\:ss"),
@@ -97,29 +98,30 @@ namespace eAgenda.WebApi.Controllers
                 Assunto = compromisso.Assunto,
                 Data = compromisso.Data,
                 Local = compromisso.Local,
-                TipoLocalizacao = compromisso.TipoLocalizacao,
+                TipoLocal = compromisso.TipoLocal,
                 Link = compromisso.Link,
                 HoraInicio = compromisso.HoraInicio.ToString(@"hh\:mm\:ss"),
                 HoraTermino = compromisso.HoraTermino.ToString(@"hh\:mm\:ss"),
             };
 
 
-            //if (compromisso.Contato != null)
-            //{
-            //    var contato = compromisso.Contato;
+            if (compromisso.Contato != null)
+            {
+                var contato = compromisso.Contato;
 
-            //    var contatoViewModel = new ListarContatoViewModel
-            //    {
-            //        Id = contato.Id,
-            //        Nome = contato.Nome,
-            //        Cargo = contato.Cargo,
-            //        Empresa = contato.Empresa,
-            //        Email = contato.Email,
-            //        Telefone = contato.Telefone,
-            //    };
+                var contatoViewModel = new ListarContatoViewModel
+                {
+                    Id = contato.Id,
+                    Nome = contato.Nome,
+                    Cargo = contato.Cargo,
+                    Empresa = contato.Empresa,
+                    Email = contato.Email,
+                    Telefone = contato.Telefone,
+                    Favorito = contato.Favorito,
+                };
 
-            //    compromissoViewModel.Contato = contatoViewModel;
-            //}
+                compromissoViewModel.Contato = contatoViewModel;
+            }
 
             return compromissoViewModel;
         }
@@ -132,7 +134,7 @@ namespace eAgenda.WebApi.Controllers
                 Assunto = compromissoViewModel.Assunto,
                 Data = compromissoViewModel.Data,
                 Local = compromissoViewModel.Local,
-                TipoLocalizacao = compromissoViewModel.TipoLocalizacao,
+                TipoLocal = compromissoViewModel.TipoLocal,
                 Link = compromissoViewModel.Link,
                 HoraInicio = (Convert.ToDateTime(compromissoViewModel.HoraInicio)).TimeOfDay,
                 HoraTermino = (Convert.ToDateTime(compromissoViewModel.HoraTermino)).TimeOfDay
@@ -180,7 +182,7 @@ namespace eAgenda.WebApi.Controllers
             compromisso.Assunto = compromissoViewModel.Assunto;
             compromisso.Data = compromissoViewModel.Data;
             compromisso.Local = compromissoViewModel.Local;
-            compromisso.TipoLocalizacao = compromissoViewModel.TipoLocalizacao;
+            compromisso.TipoLocal = compromissoViewModel.TipoLocal;
             compromisso.Link = compromissoViewModel.Link;
             compromisso.HoraInicio = (Convert.ToDateTime(compromissoViewModel.HoraInicio)).TimeOfDay;
             compromisso.HoraTermino = (Convert.ToDateTime(compromissoViewModel.HoraTermino)).TimeOfDay;

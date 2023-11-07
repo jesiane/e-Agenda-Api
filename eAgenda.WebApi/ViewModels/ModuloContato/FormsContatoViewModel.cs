@@ -7,5 +7,6 @@
         public string Empresa { get; set; }
         public string Cargo { get; set; }
         public string Telefone { get; set; }
+        public bool Favorito { get; set; }
     }
 }

@@ -3,28 +3,24 @@ using eAgenda.Infra.Orm;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using eAgenda.Infra.Orm.ModuloDespesa;
-using eAgenda.Aplicacao.ModuloContato;
-using eAgenda.WebApi.ViewModels.ModuloContato;
 using eAgenda.WebApi.ViewModels.ModuloCategoria;
-using eAgenda.Dominio.ModuloContato;
-using eAgenda.WebApi.ViewModels.ModuloCompromisso;
 using eAgenda.Dominio.ModuloDespesa;
 using eAgenda.WebApi.ViewModels.ModuloDespesa;
 
 namespace eAgenda.WebApi.Controllers
 {
+    [Route("api/[controller]")]
     [ApiController]
-    [Route("api/categorias")]
-    public class CategoriaController : Controller
+    public class CategoriaController : ControllerBase
     {
         private ServicoCategoria servicoCategoria;
 
         public CategoriaController()
         {
             IConfiguration configuracao = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json")
-            .Build();
+              .SetBasePath(Directory.GetCurrentDirectory())
+              .AddJsonFile("appsettings.json")
+              .Build();
 
             var connectionString = configuracao.GetConnectionString("SqlServer");
 
@@ -40,45 +36,59 @@ namespace eAgenda.WebApi.Controllers
         }
 
         [HttpGet]
-        public List<ViewModels.ModuloCategoria.ListarCategoriaViewModel> SeleciontarTodos()
+        public List<ListarCategoriaViewModel> SeleciontarTodos()
         {
             var categorias = servicoCategoria.SelecionarTodos().Value;
 
             var categoriasViewModel = new List<ListarCategoriaViewModel>();
 
-            foreach (var categoria in categorias)
+            foreach (var c in categorias)
             {
-                var contatoViewModel = new ListarCategoriaViewModel
+                var categoriaViewModel = new ListarCategoriaViewModel
                 {
-                    Id = categoria.Id,
-                    Titulo = categoria.Titulo,
+                    Id = c.Id,
+                    Titulo = c.Titulo
                 };
 
-                categoriasViewModel.Add(contatoViewModel);
+                categoriasViewModel.Add(categoriaViewModel);
             }
 
             return categoriasViewModel;
         }
 
+        [HttpGet("{id}")]
+        public FormsCategoriaViewModel SeleciontarPorId(Guid id)
+        {
+            var categoria = servicoCategoria.SelecionarPorId(id).Value;
+
+            var categoriaViewModel = new FormsCategoriaViewModel
+            {
+                Titulo = categoria.Titulo
+            };
+
+            return categoriaViewModel;
+        }
+
         [HttpGet("visualizacao-completa/{id}")]
-        public VisualizarCategoriaViewModel SeleciontarPorId(Guid id)
+        public VisualizarCategoriaViewModel SeleciontarPorIdCompleto(Guid id)
         {
             var categoria = servicoCategoria.SelecionarPorId(id).Value;
 
             var categoriaViewModel = new VisualizarCategoriaViewModel
             {
                 Id = categoria.Id,
-                Titulo = categoria.Titulo,
+                Titulo = categoria.Titulo
             };
 
-            foreach (var c in categoria.Despesas)
+            foreach (var d in categoria.Despesas)
             {
+
                 var despesaViewModel = new ListarDespesaViewModel
                 {
-                    Id = c.Id,
-                    Descricao = c.Descricao,
-                    Valor = c.Valor,
-                    FormaPagamento = nameof(c.FormaPagamento)
+                    Id = d.Id,
+                    Descricao = d.Descricao,
+                    Valor = d.Valor,
+                    FormaPagamento = nameof(d.FormaPagamento)
                 };
 
                 categoriaViewModel.Despesas.Add(despesaViewModel);
@@ -90,12 +100,15 @@ namespace eAgenda.WebApi.Controllers
         [HttpPost]
         public string Inserir(FormsCategoriaViewModel categoriaViewModel)
         {
-            var categoria = new Categoria();
+            Categoria categoria = new Categoria
+            {
+                Titulo = categoriaViewModel.Titulo
+            };
 
             var resultado = servicoCategoria.Inserir(categoria);
 
             if (resultado.IsSuccess)
-                return "Contato inserido com sucesso";
+                return "Categoria inserida com sucesso";
 
             string[] erros = resultado.Errors.Select(x => x.Message).ToArray();
 
@@ -105,15 +118,24 @@ namespace eAgenda.WebApi.Controllers
         [HttpPut("{id}")]
         public string Editar(Guid id, FormsCategoriaViewModel categoriaViewModel)
         {
-            var categoria = servicoCategoria.SelecionarPorId(id).Value;
+            var resultadoBusca = servicoCategoria.SelecionarPorId(id);
+
+            if (resultadoBusca.IsFailed)
+            {
+
+                string[] errosBusca = resultadoBusca.Errors.Select(x => x.Message).ToArray();
+
+                return string.Join("\r\n", errosBusca);
+            }
+
+            var categoria = resultadoBusca.Value;
 
             categoria.Titulo = categoriaViewModel.Titulo;
-            
 
             var resultado = servicoCategoria.Editar(categoria);
 
             if (resultado.IsSuccess)
-                return "Contato editado com sucesso";
+                return "Categoria editada com sucesso";
 
             string[] erros = resultado.Errors.Select(x => x.Message).ToArray();
 
@@ -127,17 +149,16 @@ namespace eAgenda.WebApi.Controllers
 
             if (resultadoBusca.IsFailed)
             {
-                string[] errosNaBusca = resultadoBusca.Errors.Select(x => x.Message).ToArray();
 
-                return string.Join("\r\n", errosNaBusca);
+                string[] errosBusca = resultadoBusca.Errors.Select(x => x.Message).ToArray();
+
+                return string.Join("\r\n", errosBusca);
             }
 
-            var categoria = resultadoBusca.Value;
-
-            var resultado = servicoCategoria.Excluir(categoria);
+            var resultado = servicoCategoria.Excluir(id);
 
             if (resultado.IsSuccess)
-                return "Contato excluído com sucesso";
+                return "Categoria excluída com sucesso";
 
             string[] erros = resultado.Errors.Select(x => x.Message).ToArray();
 
